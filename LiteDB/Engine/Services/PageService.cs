@@ -50,7 +50,37 @@ namespace LiteDB
         }
 
         /// <summary>
-        /// Set a page as dirty and ensure page are in cache. Should be used after any change on page 
+        /// Get a page from cache or from disk (get from cache or from disk)
+        /// </summary>
+        public T GetPageSafe<T>(uint pageID)
+            where T : BasePage
+        {
+            lock(_disk)
+            {
+                var page = _cache.GetPage(pageID);
+
+                // is not on cache? load from disk
+                if (page == null)
+                {
+                    var buffer = _disk.ReadPage(pageID);
+
+                    // if datafile are encrypted, decrypt buffer (header are not encrypted)
+                    if (_crypto != null && pageID > 0)
+                    {
+                        buffer = _crypto.Decrypt(buffer);
+                    }
+
+                    page = BasePage.ReadPage(buffer);
+
+                    _cache.AddPage(page);
+                }
+
+                return page as T;
+            }
+        }
+
+        /// <summary>
+        /// Set a page as dirty and ensure page are in cache. Should be used after any change on page
         /// Do not use on end of method because page can be deleted/change type
         /// </summary>
         public void SetDirty(BasePage page)

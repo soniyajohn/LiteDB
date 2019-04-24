@@ -262,7 +262,7 @@ namespace LiteDB
                 _pager.AddOrRemoveToFreeList(page.FreeBytes > IndexPage.INDEX_RESERVED_BYTES, node.Page, index.Page, ref index.FreeIndexPageID);
             }
 
-            // now remove node from nodelist 
+            // now remove node from nodelist
             var prevNode = this.GetNode(node.PrevNode);
             var nextNode = this.GetNode(node.NextNode);
 
@@ -320,8 +320,8 @@ namespace LiteDB
         public IndexNode GetNode(PageAddress address)
         {
             if (address.IsEmpty) return null;
-            var page = _pager.GetPage<IndexPage>(address.PageID);
-            return page.GetNode(address.Index);
+            var page = _pager.GetPageSafe<IndexPage>(address.PageID);
+            return page?.GetNode(address.Index);
         }
 
         /// <summary>
