@@ -162,63 +162,65 @@ namespace LiteDB
         /// <param name="collectionPage"></param>
         public void DropForced(CollectionPage collectionPage)
         {
-            var pagesToDrop = new HashSet<uint>();
-
-            IEnumerable<CollectionIndex> indexes = new CollectionIndex[0];
             try
             {
-                indexes = collectionPage.GetIndexes(true);
-            }
-            catch (Exception)
-            {
-                // exceptions are ignored
-            }
+                var pagesToDrop = new HashSet<uint>();
 
-            foreach (var collectionIndex in indexes)
-            {
-                IEnumerable<IndexNode> indexNodes = new IndexNode[0];
-                try
-                {
-                    indexNodes = _indexer.FindAll(collectionIndex, Query.Ascending);
-                }
-                catch (Exception)
-                {
-                    // exceptions are ignored
-                }
+                var indexes = collectionPage.GetIndexes(true);
 
-                foreach (var node in indexNodes)
+                foreach (var collectionIndex in indexes)
                 {
-                    if (collectionIndex.Slot == 0)
+                    try
                     {
-                        pagesToDrop.Add(node.DataBlock.PageID);
+                        var indexNodes = _indexer.FindAll(collectionIndex, Query.Ascending);
 
-                        var block = _data.GetBlock(node.DataBlock);
-
-                        if (block.ExtendPageID != uint.MaxValue)
+                        foreach (var node in indexNodes)
                         {
-                            _pager.DeletePage(block.ExtendPageID, true);
-                            _trans.CheckPoint();
+                            if (collectionIndex.Slot == 0)
+                            {
+                                pagesToDrop.Add(node.DataBlock.PageID);
+
+                                var block = _data.GetBlock(node.DataBlock);
+
+                                if (block.ExtendPageID != uint.MaxValue)
+                                {
+                                    _pager.DeletePage(block.ExtendPageID, true);
+                                    _trans.CheckPoint();
+                                }
+                            }
+
+                            pagesToDrop.Add(node.Position.PageID);
                         }
                     }
-
-                    pagesToDrop.Add(node.Position.PageID);
+                    catch
+                    {
+                        _log.Write(Logger.ERROR, "Exception during force drop iteration");
+                    }
+                    finally
+                    {
+                        pagesToDrop.Add(collectionIndex.HeadNode.PageID);
+                        pagesToDrop.Add(collectionIndex.TailNode.PageID);
+                    }
                 }
 
-                pagesToDrop.Add(collectionIndex.HeadNode.PageID);
-                pagesToDrop.Add(collectionIndex.TailNode.PageID);
+                pagesToDrop.Add(collectionPage.PageID);
+
+                foreach (var pageToDrop in pagesToDrop)
+                {
+                    _pager.DeletePage(pageToDrop);
+                    _trans.CheckPoint();
+                }
             }
-
-            pagesToDrop.Add(collectionPage.PageID);
-
-            foreach (var pageToDrop in pagesToDrop)
+            catch
             {
-                _pager.DeletePage(pageToDrop);
-                _trans.CheckPoint();
+                _log.Write(Logger.ERROR, "Exception during force drop");
             }
-
-            var header = _pager.GetPage<HeaderPage>(0);
-            header.CollectionPages.Remove(collectionPage.CollectionName);
-            _pager.SetDirty(header);
+            finally
+            {
+                var header = _pager.GetPage<HeaderPage>(0);
+                header.CollectionPages.Remove(collectionPage.CollectionName);
+                _pager.SetDirty(header);
+            }
         }
     }
 }
