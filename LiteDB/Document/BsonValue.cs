@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace LiteDB
@@ -122,6 +121,12 @@ namespace LiteDB
             this.RawValue = value.Truncate();
         }
 
+        public BsonValue(DateTimeOffset value)
+        {
+            this.Type = BsonType.DateTimeOffset;
+            this.RawValue = value.Truncate();
+        }
+
         public BsonValue(BsonValue value)
         {
             this.Type = value == null ? BsonType.Null : value.Type;
@@ -148,6 +153,11 @@ namespace LiteDB
             {
                 this.Type = BsonType.DateTime;
                 this.RawValue = ((DateTime)value).Truncate();
+            }
+            else if (value is DateTimeOffset)
+            {
+                this.Type = BsonType.DateTimeOffset;
+                this.RawValue = ((DateTimeOffset)value).Truncate();
             }
             else if (value is BsonValue)
             {
@@ -275,6 +285,11 @@ namespace LiteDB
             get { return this.Type == BsonType.DateTime ? (DateTime)this.RawValue : default(DateTime); }
         }
 
+        public DateTimeOffset AsDateTimeOffset
+        {
+            get { return this.Type == BsonType.DateTimeOffset ? (DateTimeOffset)this.RawValue : default(DateTimeOffset); }
+        }
+
         public ObjectId AsObjectId
         {
             get { return this.Type == BsonType.ObjectId ? (ObjectId)this.RawValue : default(ObjectId); }
@@ -357,6 +372,11 @@ namespace LiteDB
         public bool IsDateTime
         {
             get { return this.Type == BsonType.DateTime; }
+        }
+
+        public bool IsDateTimeOffset
+        {
+            get { return this.Type == BsonType.DateTimeOffset; }
         }
 
         public bool IsMinValue
@@ -529,6 +549,18 @@ namespace LiteDB
             return new BsonValue(value);
         }
 
+        // DateTimeOffset
+        public static implicit operator DateTimeOffset(BsonValue value)
+        {
+            return (DateTimeOffset)value.RawValue;
+        }
+
+        // DateTime
+        public static implicit operator BsonValue(DateTimeOffset value)
+        {
+            return new BsonValue(value);
+        }
+
         // +
         public static BsonValue operator +(BsonValue left, BsonValue right)
         {
@@ -635,7 +667,7 @@ namespace LiteDB
                 case BsonType.Double: return ((Double)this.RawValue).CompareTo((Double)other.RawValue);
                 case BsonType.Decimal: return ((Decimal)this.RawValue).CompareTo((Decimal)other.RawValue);
 
-                case BsonType.String: return string.Compare((String)this.RawValue, (String)other.RawValue);
+                case BsonType.String: return string.Compare((string)this.RawValue, (string)other.RawValue);
 
                 case BsonType.Document: return this.AsDocument.CompareTo(other);
                 case BsonType.Array: return this.AsArray.CompareTo(other);
@@ -646,11 +678,15 @@ namespace LiteDB
 
                 case BsonType.Boolean: return ((Boolean)this.RawValue).CompareTo((Boolean)other.RawValue);
                 case BsonType.DateTime:
-                    var d0 = (DateTime)this.RawValue;
-                    var d1 = (DateTime)other.RawValue;
-                    if (d0.Kind != DateTimeKind.Utc) d0 = d0.ToUniversalTime();
-                    if (d1.Kind != DateTimeKind.Utc) d1 = d1.ToUniversalTime();
-                    return d0.CompareTo(d1);
+                    var dt0 = (DateTime)this.RawValue;
+                    var dt1 = (DateTime)other.RawValue;
+                    if (dt0.Kind != DateTimeKind.Utc) dt0 = dt0.ToUniversalTime();
+                    if (dt1.Kind != DateTimeKind.Utc) dt1 = dt1.ToUniversalTime();
+                    return dt0.CompareTo(dt1);
+                case BsonType.DateTimeOffset:
+                    var dto0 = (DateTimeOffset)this.RawValue;
+                    var dto1 = (DateTimeOffset)other.RawValue;
+                    return dto0.CompareTo(dto1);
 
                 default: throw new NotImplementedException();
             }
@@ -744,6 +780,7 @@ namespace LiteDB
 
                 case BsonType.Boolean: this.Length = 1; break;
                 case BsonType.DateTime: this.Length = 8; break;
+                case BsonType.DateTimeOffset: this.Length = Encoding.UTF8.GetByteCount(((DateTimeOffset)this.RawValue).ToString("O")); break;
 
                 // for Array/Document calculate from elements
                 case BsonType.Array:
@@ -775,7 +812,7 @@ namespace LiteDB
                 Encoding.UTF8.GetByteCount(key) + // CString
                 1 + // CString 0x00
                 value.GetBytesCount(recalc) +
-                (value.Type == BsonType.String || value.Type == BsonType.Binary || value.Type == BsonType.Guid ? 5 : 0); // bytes.Length + 0x??
+                (value.Type == BsonType.String || value.Type == BsonType.Binary || value.Type == BsonType.Guid || value.Type == BsonType.DateTimeOffset ? 5 : 0); // bytes.Length + 0x??
         }
 
         #endregion

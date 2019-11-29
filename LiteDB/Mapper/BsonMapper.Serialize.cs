@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -64,6 +63,7 @@ namespace LiteDB
             else if (obj is Guid) return new BsonValue((Guid)obj);
             else if (obj is Boolean) return new BsonValue((Boolean)obj);
             else if (obj is DateTime) return new BsonValue((DateTime)obj);
+            else if (obj is DateTimeOffset) return new BsonValue((DateTimeOffset) obj);
             // basic .net type to convert to bson
             else if (obj is Int16 || obj is UInt16 || obj is Byte || obj is SByte)
             {

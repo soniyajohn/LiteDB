@@ -1,54 +1,41 @@
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using LiteDB;
 
 namespace LiteDB.Demo
 {
     public class Program
     {
-        [STAThread]
         static void Main(string[] args)
         {
-            var orig = @"C:\Git\LiteDB\LiteDB.Shell\bin\Debug\net40\teste.db";
+            var listOfTestClasses = Enumerable.Range(0, 10)
+                .Select(days =>
+                    new TestClassIssueDateTimeOffset
+                    {
+                        Id = Guid.NewGuid(),
+                        DateTimeOffset = DateTimeOffset.Now.AddDays(days * -1)
+                    })
+                .ToList();
 
-
-
-            using (var db = new LiteEngine(orig))
+            using (var db = new LiteDatabase(new MemoryStream()))
             {
-                var col = db.GetCollectionNames().First();
+                var table = db.GetCollection<TestClassIssueDateTimeOffset>();
 
-                var tt = db.FindAll(col).ToArray();
+                table.Insert(listOfTestClasses);
+                var fetchedObject = table.FindById(listOfTestClasses[0].Id);
 
-                var c = db.FindOne("DataObjects_1", Query.EQ("_id", "qyeyeW.1oMJK5"));
+                var dateTimeOffsetConstraint = DateTimeOffset.Now.AddDays(-2);
+                var objectQuery = table.Find(Query.GTE(nameof(TestClassIssueDateTimeOffset.DateTimeOffset), dateTimeOffsetConstraint)).ToList();
 
-                
-
-                Console.WriteLine(c == null);
-
+                Debugger.Break();
             }
-                //{
-                //    // reading all database
-                //    foreach (var col in db.GetCollectionNames())
-                //    {
-                //        Console.WriteLine("Collection: " + col);
-                //    
-                //    
-                //        foreach (var doc in db.Find(col, Query.All("Token.LastUsedOn")).Take(10))
-                //        {
-                //            Console.WriteLine(JsonSerializer.Serialize(doc, true));
-                //            // ok
-                //        }
-                //    }
-                //}
+        }
 
-
-                Console.WriteLine("End.");
-            Console.ReadKey();
+        private class TestClassIssueDateTimeOffset
+        {
+            public Guid Id { get; set; }
+            public DateTimeOffset DateTimeOffset { get; set; }
         }
     }
 }

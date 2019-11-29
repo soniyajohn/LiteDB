@@ -25,7 +25,8 @@
 
         Boolean = 12,
         DateTime = 13,
+        DateTimeOffset = 14,
 
-        MaxValue = 14
+        MaxValue = 15
     }
 }
