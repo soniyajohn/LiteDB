@@ -52,6 +52,7 @@ namespace LiteDB
             typeof(Boolean),
             typeof(Guid),
             typeof(DateTime),
+            typeof(DateTimeOffset),
             typeof(Byte[]),
             typeof(ObjectId),
             typeof(Double),
@@ -132,7 +133,7 @@ namespace LiteDB
             // if value is array, deserialize as array
             else if (value.IsArray)
             {
-                // when array are from an object (like in Dictionary<string, object> { ["array"] = new string[] { "a", "b" } 
+                // when array are from an object (like in Dictionary<string, object> { ["array"] = new string[] { "a", "b" }
                 if (type == typeof(object))
                 {
                     return this.DeserializeArray(typeof(object), value.AsArray);

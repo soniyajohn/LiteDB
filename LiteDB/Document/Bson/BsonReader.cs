@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 
 namespace LiteDB
 {
@@ -118,6 +117,10 @@ namespace LiteDB
                 var date = BsonValue.UnixEpoch.AddMilliseconds(ts);
 
                 return _utcDate ? date : date.ToLocalTime();
+            }
+            else if (type == 0x0B) // DateTimeOffset
+            {
+                return reader.ReadDateTimeOffset();
             }
             else if (type == 0x0A) // Null
             {

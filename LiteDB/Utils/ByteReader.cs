@@ -178,6 +178,11 @@ namespace LiteDB
             return date.ToLocalTime();
         }
 
+        public DateTimeOffset ReadDateTimeOffset()
+        {
+            return DateTimeOffset.ParseExact(this.ReadBsonString(), "O", null);
+        }
+
         public Guid ReadGuid()
         {
             return new Guid(this.ReadBytes(16));
@@ -217,6 +222,7 @@ namespace LiteDB
 
                 case BsonType.Boolean: return this.ReadBoolean();
                 case BsonType.DateTime: return this.ReadDateTime();
+                case BsonType.DateTimeOffset: return this.ReadDateTimeOffset();
 
                 case BsonType.MinValue: return BsonValue.MinValue;
                 case BsonType.MaxValue: return BsonValue.MaxValue;

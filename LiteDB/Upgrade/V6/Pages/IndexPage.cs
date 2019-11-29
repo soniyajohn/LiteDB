@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LiteDB_V6
 {
@@ -14,7 +13,7 @@ namespace LiteDB_V6
         {
             this.Nodes = new Dictionary<ushort, IndexNode>();
         }
-		
+
         protected override void ReadContent(LiteDB.ByteReader reader)
         {
             this.Nodes = new Dictionary<ushort, IndexNode>(this.ItemCount);
@@ -68,9 +67,10 @@ namespace LiteDB_V6
 
                 case 11: return reader.ReadBoolean();
                 case 12: return reader.ReadDateTime();
+                case 13:return reader.ReadDateTimeOffset();
 
                 case 0: return LiteDB.BsonValue.MinValue;
-                case 13: return LiteDB.BsonValue.MaxValue;
+                case 14: return LiteDB.BsonValue.MaxValue;
             }
 
             throw new NotImplementedException();

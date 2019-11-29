@@ -80,6 +80,10 @@ namespace LiteDB
                     this.WriteExtendDataType("$date", ((DateTime)value.RawValue).ToUniversalTime().ToString("o"));
                     break;
 
+                case BsonType.DateTimeOffset:
+                    this.WriteExtendDataType("$datetimeoffset", ((DateTimeOffset)value.RawValue).ToString("O"));
+                    break;
+
                 case BsonType.Int64:
                     this.WriteExtendDataType("$numberLong", ((Int64)value.RawValue).ToString());
                     break;

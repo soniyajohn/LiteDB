@@ -118,6 +118,12 @@ namespace LiteDB
                     writer.Write(Convert.ToInt64(ts.TotalMilliseconds));
                     break;
 
+                case BsonType.DateTimeOffset:
+                    writer.Write((byte)0x0B);
+                    this.WriteCString(writer, key);
+                    this.WriteDateTimeOffset(writer, (DateTimeOffset)value.RawValue);
+                    break;
+
                 case BsonType.Null:
                     writer.Write((byte)0x0A);
                     this.WriteCString(writer, key);
@@ -151,6 +157,11 @@ namespace LiteDB
                     this.WriteCString(writer, key);
                     break;
             }
+        }
+
+        private void WriteDateTimeOffset(ByteWriter writer, DateTimeOffset dto)
+        {
+            WriteString(writer, dto.ToString("O"));
         }
 
         private void WriteString(ByteWriter writer, string s)
