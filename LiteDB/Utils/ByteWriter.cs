@@ -232,7 +232,7 @@ namespace LiteDB
 
                 case BsonType.Boolean: this.Write((Boolean)value.RawValue); break;
                 case BsonType.DateTime: this.Write((DateTime)value.RawValue); break;
-                case BsonType.DateTimeOffset: this.Write(((DateTimeOffset)value.RawValue).ToString("O")); break;
+                case BsonType.DateTimeOffset: this.Write(((DateTimeOffset)value.RawValue).ToString("O"), length); break;
 
                 default: throw new NotImplementedException();
             }

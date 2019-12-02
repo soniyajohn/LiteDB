@@ -5,7 +5,11 @@ namespace LiteDB_V6
 {
     internal class IndexPage : BasePage
     {
-        public override PageType PageType { get { return PageType.Index; } }
+        public override PageType PageType
+        {
+            get { return PageType.Index; }
+        }
+
         public Dictionary<ushort, IndexNode> Nodes { get; set; }
 
         public IndexPage(uint pageID)
@@ -40,6 +44,7 @@ namespace LiteDB_V6
                 this.Nodes.Add(node.Position.Index, node);
             }
         }
+
         /// <summary>
         /// Write a custom ReadBsonValue because BsonType changed from v6 to v7
         /// </summary>
@@ -67,7 +72,7 @@ namespace LiteDB_V6
 
                 case 11: return reader.ReadBoolean();
                 case 12: return reader.ReadDateTime();
-                case 13:return reader.ReadDateTimeOffset();
+                case 13: return reader.ReadDateTimeOffset(length);
 
                 case 0: return LiteDB.BsonValue.MinValue;
                 case 14: return LiteDB.BsonValue.MaxValue;
