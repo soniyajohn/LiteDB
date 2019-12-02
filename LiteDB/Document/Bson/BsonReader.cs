@@ -120,7 +120,7 @@ namespace LiteDB
             }
             else if (type == 0x0B) // DateTimeOffset
             {
-                return reader.ReadDateTimeOffset();
+                return reader.ReadBsonDateTimeOffset();
             }
             else if (type == 0x0A) // Null
             {
