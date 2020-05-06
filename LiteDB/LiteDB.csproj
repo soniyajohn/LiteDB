@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
     <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
@@ -34,6 +34,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\LiteDB.xml</DocumentationFile>
     <SignAssembly Condition="'$(OS)'=='Windows_NT'">true</SignAssembly>
     <AssemblyOriginatorKeyFile>LiteDB.snk</AssemblyOriginatorKeyFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!--
