@@ -32,8 +32,8 @@ namespace LiteDB
 
         #region Initialize/Dispose disk
 
-        public FileDiskService(string filename, bool journal = true)
-            : this(filename, new FileOptions { Journal = journal })
+        public FileDiskService(string filename, bool journal = true, FileMode mode = FileMode.Exclusive)
+            : this(filename, new FileOptions {Journal = journal, FileMode = FileMode.Exclusive})
         {
         }
 
@@ -310,7 +310,7 @@ namespace LiteDB
                     .GetResult();
             }
 #endif
-            return new FileStream(path, mode, access, share, 
+            return new FileStream(path, mode, access, share,
                 BasePage.PAGE_SIZE,
                 System.IO.FileOptions.RandomAccess);
         }

@@ -79,7 +79,7 @@ namespace LiteDB
         /// Initialize LiteEngine with password encryption
         /// </summary>
         public LiteEngine(string filename, string password, bool journal = true)
-            : this(new FileDiskService(filename, new FileOptions { Journal = journal }), password)
+            : this(new FileDiskService(filename, new FileOptions { Journal = journal, FileMode = FileMode.Exclusive}), password)
         {
         }
 
