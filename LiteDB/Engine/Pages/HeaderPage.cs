@@ -13,12 +13,12 @@ namespace LiteDB
         /// <summary>
         /// Header info the validate that datafile is a LiteDB file (27 bytes)
         /// </summary>
-        private const string HEADER_INFO = "** This is a LiteDB file **";
+        internal const string HEADER_INFO = "** This is a LiteDB file **";
 
         /// <summary>
         /// Datafile specification version
         /// </summary>
-        private const byte FILE_VERSION = 7;
+        internal const byte FILE_VERSION = 7;
 
         /// <summary>
         /// Last modified transaction. Used to detect when other process change datafile and cache are not valid anymore
