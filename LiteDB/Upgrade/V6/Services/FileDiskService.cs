@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
 
 namespace LiteDB_V6
 {
@@ -67,7 +64,7 @@ namespace LiteDB_V6
                 // I know, header page will be double read (it's the price for isolated concerns)
                 var header = (HeaderPage)BasePage.ReadPage(buffer);
 
-                if (LiteDB.BinaryExtensions.BinaryCompareTo(_password, header.Password) != 0)
+                if (LiteDB.BufferExtensions.BinaryCompareTo(_password, header.Password) != 0)
                 {
                     throw LiteDB.LiteException.DatabaseWrongPassword();
                 }
