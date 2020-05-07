@@ -44,7 +44,7 @@ namespace LiteDB.Engine.FileReader
 
                 if (hash.SequenceEqual(_header["password"].AsBinary) == false)
                 {
-                    throw new LiteException(0, "Invalid password");
+                    throw LiteException.DatabaseWrongPassword();
                 }
             }
 
