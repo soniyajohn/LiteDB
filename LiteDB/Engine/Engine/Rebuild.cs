@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LiteDB.Engine.FileReader;
 
@@ -10,10 +11,12 @@ namespace LiteDB
         /// Fill current database with data inside file reader
         /// </summary>
         /// <exception cref="Exception">Might throw an exception if something goes wrong while trying to read the collectionNames from the DB header.</exception>
-        internal void Rebuild(IFileReader reader)
+        internal IList<string> Rebuild(IFileReader reader)
         {
+            var unrecoverableCollections = new HashSet<string>();
             foreach (var collection in reader.GetCollections())
             {
+                var oldDocumentCount = reader.GetDocumentCountOfCollection(collection);
                 try
                 {
                     // first create all user indexes (exclude _id index)
@@ -33,13 +36,20 @@ namespace LiteDB
                     var docs = reader.GetDocuments(collection).ToList();
 
                     // and insert into
-                    this.Insert(collection, docs, BsonType.ObjectId);
+                    var insertCount = this.Insert(collection, docs, BsonType.ObjectId);
+                    if (oldDocumentCount != insertCount)
+                    {
+                        unrecoverableCollections.Add(collection);
+                    }
                 }
                 catch
                 {
                     // Silent ignore, sadly couldn't recover data.
+                    unrecoverableCollections.Add(collection);
                 }
             }
+
+            return unrecoverableCollections.ToList();
         }
     }
 }

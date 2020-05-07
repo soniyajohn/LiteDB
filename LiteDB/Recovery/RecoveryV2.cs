@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using LiteDB.Engine.FileReader;
@@ -8,12 +9,13 @@ namespace LiteDB
     public partial class LiteEngine
     {
         /// <summary>
-        /// Attempts to recover a LiteDB database with one or more broken collections. Returns true if the recovery process finished successfully.
-        /// Returns false if the file could not be found.
-        /// <exception cref="ArgumentNullException">Gets thrown when the filename/path is null, empty or whitespace</exception>
-        /// <exception cref="LiteException">Gets thrown when another LiteDB specific error occurs</exception>
+        /// Attempts to recover a LiteDB database with one or more broken collections.
         /// </summary>
-        public static bool RecoveryV2(string filename, string password = null)
+        /// <returns>A list of names of unrecoverable collection.</returns>
+        /// <exception cref="ArgumentNullException">Gets thrown when the filename/path is null, empty or whitespace</exception>
+        /// <exception cref="FileNotFoundException">Gets thrown when the file specified by the filename/path could not be found</exception>
+        /// <exception cref="LiteException">Gets thrown when another LiteDB specific error occurs</exception>
+        public static IList<string> RecoveryV2(string filename, string password = null)
         {
             if (filename.IsNullOrWhiteSpace())
             {
@@ -22,25 +24,25 @@ namespace LiteDB
 
             if (!File.Exists(filename))
             {
-                return false;
+                throw new FileNotFoundException();
             }
 
-            var backup = FileHelper.GetTempFile(filename, "-backup", true);
+            IList<string> unrecoverableCollections = new List<string>();
 
             var tempFilename = FileHelper.GetTempFile(filename, "-temp", true);
 
-            using (var stream = new FileStream(filename, System.IO.FileMode.Open, FileAccess.Read))
+            using (var oldDbStream = new FileStream(filename, System.IO.FileMode.Open, FileAccess.Read))
             {
                 var buffer = new byte[BasePage.PAGE_SIZE];
 
                 // read headerPage
-                stream.Read(buffer, 0, buffer.Length);
+                oldDbStream.Read(buffer, 0, buffer.Length);
 
                 // checks if plain or encrypted
                 IFileReader reader;
                 if (Encoding.UTF8.GetString(buffer, 25, HeaderPage.HEADER_INFO.Length) == HeaderPage.HEADER_INFO && buffer[52] == 7)
                 {
-                    reader = new FileReaderV7(stream, password);
+                    reader = new FileReaderV7(oldDbStream, password);
                 }
                 else
                 {
@@ -51,7 +53,7 @@ namespace LiteDB
                 {
                     using (var engine = new LiteEngine(tempFilename, password))
                     {
-                        engine.Rebuild(reader);
+                        unrecoverableCollections = engine.Rebuild(reader);
                     }
                 }
                 finally
@@ -61,12 +63,13 @@ namespace LiteDB
             }
 
             // rename source filename to backup name
+            var backup = FileHelper.GetTempFile(filename, "-backup", true);
             File.Move(filename, backup);
 
             // rename temp file into filename
             File.Move(tempFilename, filename);
 
-            return true;
+            return unrecoverableCollections;
         }
     }
 }
