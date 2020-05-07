@@ -59,6 +59,14 @@ namespace LiteDB.Engine.FileReader
             return _header["collections"].AsDocument.Keys;
         }
 
+        public long GetDocumentCountOfCollection(string collection)
+        {
+            var pageID = (uint) _header["collections"].AsDocument[collection].AsInt32;
+            var page = this.ReadPage(pageID);
+
+            return page["documentCount"].AsInt64;
+        }
+
         /// <summary>
         /// Read all indexes from all collection pages
         /// </summary>
@@ -210,8 +218,9 @@ namespace LiteDB.Engine.FileReader
             else if (page["pageType"] == 2)
             {
                 page["collectionName"] = reader.ReadString();
+                page["documentCount"] = reader.ReadInt64();
                 page["indexes"] = new BsonArray();
-                reader.ReadBytes(12);
+                reader.ReadBytes(4);
 
                 for (var i = 0; i < 16; i++)
                 {

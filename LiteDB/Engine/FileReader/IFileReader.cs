@@ -13,8 +13,12 @@ namespace LiteDB.Engine.FileReader
         /// <summary>
         /// Get all collections name from database
         /// </summary>
-        /// <returns></returns>
         IEnumerable<string> GetCollections();
+
+        /// <summary>
+        /// Get total itemcount of specified collection
+        /// </summary>
+        long GetDocumentCountOfCollection(string collection);
 
         /// <summary>
         /// Get all indexes from collection (except _id index)
