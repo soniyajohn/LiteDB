@@ -11,8 +11,9 @@ namespace LiteDB.Engine.FileReader
         int UserVersion { get; }
 
         /// <summary>
-        /// Get all collections name from database
+        /// Get all collection names from database
         /// </summary>
+        /// <remarks>Based on headerpage of database</remarks>
         IEnumerable<string> GetCollections();
 
         /// <summary>
