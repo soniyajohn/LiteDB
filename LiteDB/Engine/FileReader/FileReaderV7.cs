@@ -52,13 +52,17 @@ namespace LiteDB.Engine.FileReader
         }
 
         /// <summary>
-        /// Read all collection based on header page
+        /// Get all collection names from database
         /// </summary>
+        /// <remarks>Based on headerpage of database</remarks>
         public IEnumerable<string> GetCollections()
         {
             return _header["collections"].AsDocument.Keys;
         }
 
+        /// <summary>
+        /// Get total itemcount of specified collection
+        /// </summary>
         public long GetDocumentCountOfCollection(string collection)
         {
             var pageID = (uint) _header["collections"].AsDocument[collection].AsInt32;
@@ -68,7 +72,7 @@ namespace LiteDB.Engine.FileReader
         }
 
         /// <summary>
-        /// Read all indexes from all collection pages
+        /// Get all indexes from collection (except _id index)
         /// </summary>
         public IEnumerable<IndexInfo> GetIndexes(string collection)
         {
@@ -148,7 +152,7 @@ namespace LiteDB.Engine.FileReader
         }
 
         /// <summary>
-        /// Read all database pages from v7 structure into a flexible BsonDocument - only read what really needs
+        /// Read all database pages from v7 structure into a flexible BsonDocument - only read whats really needed
         /// </summary>
         private BsonDocument ReadPage(uint pageID)
         {
@@ -344,7 +348,7 @@ namespace LiteDB.Engine.FileReader
         }
 
         /// <summary>
-        /// Read extend data block
+        /// Read extended data block
         /// </summary>
         private byte[] ReadExtendData(uint extendPageID)
         {
