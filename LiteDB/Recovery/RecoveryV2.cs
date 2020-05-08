@@ -62,9 +62,8 @@ namespace LiteDB
                 }
             }
 
-            // rename source filename to backup name
-            var backup = FileHelper.GetTempFile(filename, "-backup", true);
-            File.Move(filename, backup);
+            // delete source file so the fixed file can take its place
+            File.Delete(filename);
 
             // rename temp file into filename
             File.Move(tempFilename, filename);
